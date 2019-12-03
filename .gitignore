@@ -1,2 +1,5 @@
 .vscode
 .pyc
+temp.py
+__pycache__
+*.sys
