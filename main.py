@@ -7,6 +7,9 @@ import re
 import logging
 import CPUTemp
 import time
+# import run_cmd
+
+
 if os.name == 'nt':
     import wmi
 else:
@@ -14,7 +17,7 @@ else:
 
 cpu = CPUTemp.CPUTemp()
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 parser = argparse.ArgumentParser()
 parser.add_argument("--input_dir", "-i", required=True,
                     help="Input directory's name")
@@ -29,8 +32,7 @@ def work(cmd):
 
 
 def check_temp():
-    if cpu.get_cpu_temp() > 65:
-        time.sleep(10)
+    return cpu.get_cpu_temp()
 
 
 def get_all_files_with_extensions(list_ext=[], dir=""):
@@ -63,8 +65,17 @@ new_files = [pathlib.Path(args.output_dir, x) for x in original_files]
 if logging.getLogger().level == logging.DEBUG:
     for fil in original_files:
         logging.debug(fil)
+
+commands = []
 if logging.getLogger().level != logging.DEBUG:
     for i, f in enumerate(original_files):
-        subprocess.call(["handbrake", "-i", f, "-o", new_files[i]])
+        origin = str(f)
+        dest = str(new_files[i])
+        commands.append(''.join(["handbrake", "-i", origin, "-o", dest]))
         if check_temp() > 70:
             time.sleep(70)
+
+p = subprocess.Popen("&& ".join(commands), shell=True, stdout=subprocess.PIPE)
+out, err = p.communicate()
+
+print(out)

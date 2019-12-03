@@ -35,7 +35,6 @@ class CPUTemp:
                 return sensor.Value
 
     def get_win_cpu_temp(self):
-        logging.debug(self.cpu)
         return self.fetch_temp()
 
     def get_linux_cpu_temp(self):
