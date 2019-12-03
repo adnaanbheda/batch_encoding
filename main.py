@@ -41,10 +41,12 @@ def get_all_files_with_extensions(list_ext=[], dir=""):
             rel_file = os.path.join(rel_dir, f)
             _, file_ext = os.path.splitext(str(rel_file))
             if file_ext in list_ext:
-                files.append(rel_file)
-        for d in dirnames:
-            # Make Sure all required directories are created, even if they exist
-            pathlib.Path(args.output_dir, d).mkdir(parents=True, exist_ok=True)
+                files.append(os.path.join(dirpath, f))
+        if logging.getLogger().level != logging.DEBUG:
+            for d in dirnames:
+                # Make Sure all required directories are created, even if they exist
+                pathlib.Path(args.output_dir, d).mkdir(
+                    parents=True, exist_ok=True)
     # Changing the root of the files as the output dir
 
     return files
@@ -55,14 +57,14 @@ logging.info(args.output_dir)
 
 
 original_files = get_all_files_with_extensions(extensions, args.input_dir)
-new_files = [pathlib.Path(args.output_dir, x) for x in files]
+new_files = [pathlib.Path(args.output_dir, x) for x in original_files]
 
 # Debug File Values
-if logging.getLevelName == logging.DEBUG:
-    for fil in files:
+if logging.getLogger().level == logging.DEBUG:
+    for fil in original_files:
         logging.debug(fil)
-
-for i, f in enumerate(original_files):
-    subprocess.call(["handbrake", "-i", f, "-o", new_files[i]])
-    if check_temp() > 70:
-        time.sleep(70)
+if logging.getLogger().level != logging.DEBUG:
+    for i, f in enumerate(original_files):
+        subprocess.call(["handbrake", "-i", f, "-o", new_files[i]])
+        if check_temp() > 70:
+            time.sleep(70)
