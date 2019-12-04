@@ -45,3 +45,7 @@ class CPUTemp:
             return self.get_win_cpu_temp()
         else:
             return self.get_linux_cpu_temp()
+
+
+C=CPUTemp()
+print(C.get_cpu_temp())

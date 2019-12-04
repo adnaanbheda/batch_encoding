@@ -7,11 +7,12 @@ import re
 import logging
 import CPUTemp
 import time
+import pickle
 # import run_cmd
 
-
+files_done={}
 if os.name == 'nt':
-    import wmi
+    import clr
 else:
     import psutil
 
@@ -43,12 +44,13 @@ def get_all_files_with_extensions(list_ext=[], dir=""):
             rel_file = os.path.join(rel_dir, f)
             _, file_ext = os.path.splitext(str(rel_file))
             if file_ext in list_ext:
-                files.append(os.path.join(dirpath, f))
-        if logging.getLogger().level != logging.DEBUG:
-            for d in dirnames:
-                # Make Sure all required directories are created, even if they exist
-                pathlib.Path(args.output_dir, d).mkdir(
-                    parents=True, exist_ok=True)
+                files.append(rel_file)
+        structure = os.path.join(
+            args.output_dir, dirpath[len(args.input_dir):])
+        if not os.path.isdir(structure):
+            os.mkdir(structure)
+        else:
+            print("Folder does already exits!")
     # Changing the root of the files as the output dir
 
     return files
@@ -57,26 +59,28 @@ def get_all_files_with_extensions(list_ext=[], dir=""):
 logging.info(args.input_dir)
 logging.info(args.output_dir)
 
+files_done[args.input_dir]=[]
 
-original_files = get_all_files_with_extensions(extensions, args.input_dir)
-new_files = [pathlib.Path(args.output_dir, x) for x in original_files]
+files = get_all_files_with_extensions(extensions, args.input_dir)
+original_files = [pathlib.Path(args.input_dir, x) for x in files]
+new_files = [pathlib.Path(args.output_dir, x) for x in files]
 
-# Debug File Values
-if logging.getLogger().level == logging.DEBUG:
-    for fil in original_files:
-        logging.debug(fil)
+logging.info(original_files[0])
+logging.info(new_files[0])
 
 commands = []
-if logging.getLogger().level != logging.DEBUG:
-    for i, f in enumerate(original_files):
-        origin = str(f)
-        dest = str(new_files[i])
-        process = subprocess.Popen(["handbrake", "-i", origin, "-o", dest])
-        process.wait()
-        if check_temp() > 70:
-            time.sleep(70)
+for i, f in enumerate(original_files):
+    origin = str(f)
+    dest = str(new_files[i])
+    process = subprocess.Popen(["handbrake", "-i",origin,"-o",dest])
+    process.wait()
+    if check_temp() > 70:
+        time.sleep(70)
 
 for cmd in commands:
     print(cmd)
     process = subprocess.Popen(cmd)
     process.wait()
+
+
+pickle.dumps(files_done,)
