@@ -71,11 +71,12 @@ if logging.getLogger().level != logging.DEBUG:
     for i, f in enumerate(original_files):
         origin = str(f)
         dest = str(new_files[i])
-        commands.append(''.join(["handbrake", "-i", origin, "-o", dest]))
+        process = subprocess.Popen(["handbrake", "-i", origin, "-o", dest])
+        process.wait()
         if check_temp() > 70:
             time.sleep(70)
 
-p = subprocess.Popen("&& ".join(commands), shell=True, stdout=subprocess.PIPE)
-out, err = p.communicate()
-
-print(out)
+for cmd in commands:
+    print(cmd)
+    process = subprocess.Popen(cmd)
+    process.wait()

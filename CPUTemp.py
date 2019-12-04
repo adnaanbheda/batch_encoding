@@ -1,7 +1,7 @@
 import os
 import clr
 import logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 openhardwaremonitor_hwtypes = ['Mainboard', 'SuperIO', 'CPU',
                                'RAM', 'GpuNvidia', 'GpuAti', 'TBalancer', 'Heatmaster', 'HDD']
 
